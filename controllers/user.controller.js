@@ -68,20 +68,10 @@ UserController.updateUser = async (req, res) => {
     try {
         const _id = req.params.id;
         const newData = req.body;
-        const userUpdae = await User.findOneAndUpdate({_id:_id}, newData)
-        const user = new User({
-            password,
-            refNames,
-            firstName,
-            lastName,
-            gender,
-            email,
-            birthday
-        });
-        await user.save();
+        const user = await User.findOneAndUpdate({_id:_id}, newData,);
         return res.status(200).json({
             isSuccess: true,
-            user
+            message: 'Update susscess'
         });
 
     } catch (err) {
@@ -93,7 +83,22 @@ UserController.updateUser = async (req, res) => {
 };
 
 UserController.deleteUser = async (req, res) => {
+    try {
+        const _id = req.params.id;
+        const newData = req.body;
+        const user = await User.findById(_id);
+        await user.remove();
+        return res.status(200).json({
+            isSuccess: true,
+            message: 'Delete susscess'
+        });
 
+    } catch (err) {
+        return res.status(400).json({
+            isSuccess: false,
+            error: err
+        });
+    }
 };
 
 export default UserController;
