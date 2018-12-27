@@ -68,7 +68,7 @@ UserController.updateUser = async (req, res) => {
     try {
         const _id = req.params.id;
         const newData = req.body;
-        const user = await User.findOneAndUpdate({_id:_id}, newData,);
+        const user = await User.findOneAndUpdate({_id:_id}, newData);
         return res.status(200).json({
             isSuccess: true,
             message: 'Update susscess'
@@ -82,11 +82,18 @@ UserController.updateUser = async (req, res) => {
     }
 };
 
-UserController.deleteUser = async (req, res) => {
+UserController.deleteUser = async (req, res, next) => {
     try {
         const _id = req.params.id;
         const newData = req.body;
         const user = await User.findById(_id);
+        // if (user === null) {
+        //     return res.status(422).json({
+        //         isSuccess: false,
+        //         message: 'User not found!'
+        //     });  
+        // }
+
         await user.remove();
         return res.status(200).json({
             isSuccess: true,
@@ -94,10 +101,7 @@ UserController.deleteUser = async (req, res) => {
         });
 
     } catch (err) {
-        return res.status(400).json({
-            isSuccess: false,
-            error: err
-        });
+        next(err);
     }
 };
 

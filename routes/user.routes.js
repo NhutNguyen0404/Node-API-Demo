@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import UserController from '../controllers/user.controller';
+import validate  from 'express-validation';
+import validations from '../validation/user';
 const router = new Router();
 
 // Get all users
@@ -14,7 +16,7 @@ const router = new Router();
 // CRUD user
 router.get('/users', UserController.getAll);
 router.get('/users/:id', UserController.getOneUser);// req.params
-router.post('/users', UserController.addUser); // req.body
+router.post('/users', validate (validations.createUser) , UserController.addUser); // req.body
 router.put('/users/:id', UserController.updateUser); // req.body
 router.delete('/users/:id', UserController.deleteUser);
 
