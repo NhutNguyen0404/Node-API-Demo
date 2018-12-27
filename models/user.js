@@ -20,7 +20,7 @@ let userSchema = new Schema({
 			message: props => `${props.value} is not a valid email!`
 		},
 		required: true,
-		unique: true
+		index: { unique: true }
 	},
     password: {
 	    type: String,
@@ -37,7 +37,35 @@ let userSchema = new Schema({
 	    	message: props => `${props.value} you must 18 age!`
 	    },
 	    required: true
-	}
+	},
+	isDelete: {
+	    type: Boolean,
+	    default: false
+	},
+});
+
+userSchema.pre('find', function() {
+	const query = this.getQuery();
+    query['$or'] = [
+        {
+            isDelete: false
+        },
+        {
+            isDelete: null
+        }
+    ]
+});
+
+userSchema.pre('findOne', function() {
+	const query = this.getQuery();
+    query['$or'] = [
+        {
+            isDelete: false
+        },
+        {
+            isDelete: null
+        }
+    ]
 });
 
 let User = mongoose.model('User', userSchema);

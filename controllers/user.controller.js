@@ -2,7 +2,7 @@ import User from '../models/user';
 
 const UserController = {};
 
-UserController.getAll = async (req, res) => {
+UserController.getAll = async (req, res, next) => {
     try {
         await User.find().exec((err, users) => {
             if (err) {
@@ -13,15 +13,11 @@ UserController.getAll = async (req, res) => {
             });
         });
     } catch (err) {
-        return res.status(400).json({
-            isSuccess: false,
-            message: err.message,
-            error: err
-        });
+        next(next);
     }
 };
 
-UserController.getOneUser = async (req, res) => {
+UserController.getOneUser = async (req, res, next) => {
     try {
         const _id = req.params.id;
         const user = await User.findById(_id);
@@ -29,16 +25,12 @@ UserController.getOneUser = async (req, res) => {
             isSuccess: true,
             user
         });
-    } catch(e) {
-        return res.status(400).json({
-            isSuccess: false,
-            message: e.message,
-            error: e
-        });
+    } catch(err) {
+        next(err);
     }
 };
 
-UserController.addUser = async (req, res) => {
+UserController.addUser = async (req, res, next) => {
     try {
         const { password, refNames, firstName, lastName, gender, email, birthday } = req.body;
         const user = new User({
@@ -57,14 +49,11 @@ UserController.addUser = async (req, res) => {
         });
 
     } catch (err) {
-        return res.status(400).json({
-            isSuccess: false,
-            error: err
-        });
+        next(err);
     }
 };
 
-UserController.updateUser = async (req, res) => {
+UserController.updateUser = async (req, res, next) => {
     try {
         const _id = req.params.id;
         const newData = req.body;
@@ -73,12 +62,8 @@ UserController.updateUser = async (req, res) => {
             isSuccess: true,
             message: 'Update susscess'
         });
-
     } catch (err) {
-        return res.status(400).json({
-            isSuccess: false,
-            error: err
-        });
+        next(err);
     }
 };
 
@@ -87,14 +72,14 @@ UserController.deleteUser = async (req, res, next) => {
         const _id = req.params.id;
         const newData = req.body;
         const user = await User.findById(_id);
-        // if (user === null) {
-        //     return res.status(422).json({
-        //         isSuccess: false,
-        //         message: 'User not found!'
-        //     });  
-        // }
+        if (user === null) {
+            return res.status(422).json({
+                isSuccess: false,
+                message: 'User not found!'
+            });  
+        }
 
-        await user.remove();
+        await user.update({isDelete: true});
         return res.status(200).json({
             isSuccess: true,
             message: 'Delete susscess'
