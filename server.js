@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import connectToDb from './db/connect';
 import user from './routes/user.routes';
 import classes from './routes/class.routes';
+import group from './routes/group.routes';
 const server = express();
 
 connectToDb();
@@ -14,6 +15,7 @@ server.use(bodyParser.urlencoded({
 
 server.use(user);
 server.use(classes);
+server.use(group);
 
 server.use((err, req, res, next) => {
 	if (err) {
