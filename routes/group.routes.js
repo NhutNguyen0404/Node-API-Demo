@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import GroupController from '../controllers/group.controller';
 import validate  from 'express-validation';
-import validations from '../validation/user';
+import validations from '../validation/group';
 const router = new Router();
 
 router.get('/groups', GroupController.getAll);
