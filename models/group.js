@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
-
-let groupSchema = new Schema({
+const cols = {
 	name: {
 		type: String,
 		required: true,
@@ -25,8 +24,12 @@ let groupSchema = new Schema({
 			deleteAt: Date
 		}]
 	}
-});
+};
 
+let groupSchema = new Schema(cols);
+// create table recyGroup
+let recyGroupSchema = new Schema(cols);
+let recyGroup = mongoose.model('recyGroup', recyGroupSchema);
 let Group = mongoose.model('Group', groupSchema);
 
-export default Group;
+export default {group: Group, recyGroup: recyGroup};

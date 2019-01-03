@@ -1,5 +1,6 @@
-import Group from '../models/group';
-
+import Groups from '../models/group';
+const Group = Groups.group;
+const RecyGroup = Groups.recyGroup;
 const GroupController = {};
 
 GroupController.getAll = async (req, res, next) => {
@@ -18,10 +19,30 @@ GroupController.getAll = async (req, res, next) => {
 	}
 };
 
+GroupController.getById = async (req, res, next) => {
+	try {
+        const _id = req.params.id;
+        let group = await Group.findById(_id);
+        if (group === null) {
+			return res.status(400).json({
+	            isSuccess: false,
+	            message: "Group not found!"
+        	});
+		}
+
+        return res.status(200).json({
+            isSuccess: true,
+            items: group
+        });
+    } catch(err) {
+        next(err);
+    }
+};
+
 GroupController.create = async (req, res, next) => {
 	try {
 		const {name, lastMessage, author, members} = req.body;
-		const group = new Group({
+		let group = new Group({
 			name,
 			lastMessage,
 			author,
@@ -36,13 +57,13 @@ GroupController.create = async (req, res, next) => {
 	} catch (err) {
 		next(err);
 	}
-}
+};
 
 GroupController.update = async (req, res, next) => {
 	try {
-		const _id = req.params.id;
-		const dataUpdate = req.body;
-		const group = Group.findById(_id);
+		let _id = req.params.id;
+		let dataUpdate = req.body;
+		let group = await Group.findById(_id);
 		if (group === null) {
 			return res.status(400).json({
 	            isSuccess: false,
@@ -59,13 +80,12 @@ GroupController.update = async (req, res, next) => {
 	} catch (err) {
 		next(err);
 	}
-}
+};
 
 GroupController.delete = async (req, res, next) => {
 	try {
 		const _id = req.params.id;
-		const dataUpdate = req.body;
-		const group = Group.findById(_id);
+		let group = await Group.findById(_id);
 		if (group === null) {
 			return res.status(400).json({
 	            isSuccess: false,
@@ -73,6 +93,7 @@ GroupController.delete = async (req, res, next) => {
         	});
 		}
 
+		const isCopy = await copy(group, RecyGroup);
 		await group.remove();
         return res.status(200).json({
             isSuccess: true,
@@ -82,6 +103,23 @@ GroupController.delete = async (req, res, next) => {
 	} catch (err) {
 		next(err);
 	}
-}
+};
+
+const copy = async (data, tableContent) => {
+	try {
+		const {_id ,name, lastMessage, author, members, __v} = data;
+		let groupDelete = new tableContent({_id ,name, lastMessage, author, members, __v});
+		await groupDelete.save();
+        return {
+            isSuccess: true,
+            message: 'Copy susscess'
+        };
+	} catch (err) {
+		return {
+            isSuccess: false,
+            message: err
+        };
+	}
+};
 
 export default GroupController;
