@@ -7,7 +7,7 @@ const router = new Router();
 
 router.get('/groups', GroupController.getAll);
 router.get('/groups/:id', GroupController.getById);
-router.post('/groups', [validate (validations.create), middleware.checkId],  GroupController.create);
+router.post('/groups', [validate (validations.create)],  GroupController.create);
 router.put('/groups/:id', [validate (validations.update), middleware.checkId], GroupController.update);
 router.delete('/groups/:id', GroupController.delete);
 

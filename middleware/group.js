@@ -1,5 +1,4 @@
 import User from '../models/user';
-
 const GroupMiddleware = {};
 
 GroupMiddleware.checkId = async (req, res, next) => {
@@ -12,10 +11,9 @@ GroupMiddleware.checkId = async (req, res, next) => {
 	            message: "User not found!"
         	});
 		}
-
-       	next();
+       	return next();
     } catch(err) {
-        next(err);
+        return next(err);
     }
 };
 

@@ -25,7 +25,8 @@ server.use((err, req, res, next) => {
 		}
 		return res.status(status).json({
 			isSuccess: false,
-			error: err
+			message: err.message,
+			error: err.stack
 		});
 	}
 });

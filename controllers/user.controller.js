@@ -4,16 +4,12 @@ const UserController = {};
 
 UserController.getAll = async (req, res, next) => {
     try {
-        await User.find().exec((err, users) => {
-            if (err) {
-                res.status(500).send(err);
-            }
-            return res.json({
-                users,
-            });
+        const users = await User.find();
+        return res.json({
+            items: users
         });
     } catch (err) {
-        next(next);
+        next(err);
     }
 };
 

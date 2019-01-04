@@ -5,14 +5,10 @@ const GroupController = {};
 
 GroupController.getAll = async (req, res, next) => {
 	try {
-		await Group.find().populate('user').populate({path: 'author', select: 'firstName'}).populate({path: 'members.memberId', select: 'firstName'}).exec((err, groups) => {
-            if (err) {
-                next(err);
-            }
-            return res.status(200).json({
-            	isSuccess: true,
-                items: groups,
-            });
+		const groups = await Group.find().populate('user').populate({path: 'author', select: 'firstName'}).populate({path: 'members', select: 'firstName'});
+        return res.status(200).json({
+        	isSuccess: true,
+            items: groups,
         });
 	} catch (err) {
 		next(err);
@@ -55,7 +51,7 @@ GroupController.create = async (req, res, next) => {
         });
 
 	} catch (err) {
-		next(err);
+		return next(err);
 	}
 };
 
@@ -94,7 +90,9 @@ GroupController.delete = async (req, res, next) => {
 		}
 
 		const isCopy = await copy(group, RecyGroup);
-		await group.remove();
+		group.deletedAt = Date.now();
+		// await group.update({deletedAt: deletedAt.now()});
+		await group.save();
         return res.status(200).json({
             isSuccess: true,
             message: 'Delete susscess'
