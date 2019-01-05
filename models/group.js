@@ -40,6 +40,7 @@ const checkMember = async (members, next) => {
 		return next(err);
 	}
 };
+
 groupSchema.pre('save', async function(next) {
 	const userId = this.author;
 	const members = this.members;
