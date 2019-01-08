@@ -1,4 +1,5 @@
 import User from '../models/user';
+import MD5 from 'md5';
 
 const UserController = {};
 
@@ -26,22 +27,18 @@ UserController.getOneUser = async (req, res, next) => {
     }
 };
 
-UserController.addUser = async (req, res, next) => {
+UserController.create = async (req, res, next) => {
     try {
-        const { password, refNames, firstName, lastName, gender, email, birthday } = req.body;
+        const { fullName, email, password } = req.body;
         const user = new User({
-            password,
-            refNames,
-            firstName,
-            lastName,
-            gender,
+            fullName,
             email,
-            birthday
+            password: MD5(password),
         });
         await user.save();
         return res.status(200).json({
             isSuccess: true,
-            user
+            items: user
         });
 
     } catch (err) {
@@ -53,6 +50,9 @@ UserController.updateUser = async (req, res, next) => {
     try {
         const _id = req.params.id;
         const newData = req.body;
+        if (newData.password) {
+            newData.password =  MD5(newData.password);
+        }
         const user = await User.findOneAndUpdate({_id:_id}, newData);
         return res.status(200).json({
             isSuccess: true,
@@ -60,6 +60,28 @@ UserController.updateUser = async (req, res, next) => {
         });
     } catch (err) {
         next(err);
+    }
+};
+
+
+UserController.login = async (req, res, next) => {
+    try {
+        const { password, email } = req.body;
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return next(new Error('User is not found'));
+        }
+        const isCorrectPassword = MD5(password) === user.password;
+        if (!isCorrectPassword) {
+            return next(new Error('password is not correct'));
+        }
+        return res.json({
+            isSuccess: true,
+            items:user
+        });
+    } catch (err) {
+        return next(err);
     }
 };
 
@@ -74,13 +96,13 @@ UserController.deleteUser = async (req, res, next) => {
                 message: 'User not found!'
             });  
         }
-
-        await user.update({isDelete: true});
+        
+        user.deletedAt = Date.now();
+        await user.save();
         return res.status(200).json({
             isSuccess: true,
             message: 'Delete susscess'
         });
-
     } catch (err) {
         next(err);
     }

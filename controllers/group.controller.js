@@ -74,7 +74,64 @@ GroupController.update = async (req, res, next) => {
         });
 
 	} catch (err) {
-		next(err);
+		return next(err);
+	}
+};
+
+GroupController.addMembers = async (req, res, next) => {
+	try {
+		const _id = req.params.id;
+		const newMembers = req.body.members;
+		let group = await Group.findById(_id);
+		if (group === null) {
+			return res.status(400).json({
+	            isSuccess: false,
+	            message: "Group not found!"
+        	});
+		}
+
+		let members = group.members;
+		members.push.apply(members, newMembers);
+		group.members = removeDuplicate(members);
+		await group.save(group);
+        return res.status(200).json({
+            isSuccess: true,
+            message: 'Update susscess'
+        });
+
+	} catch (err) {
+		return next(err);
+	}
+};
+
+GroupController.deleteMembers = async (req, res, next) => {
+	try {
+		const _id = req.params.id;
+		const members = req.body.members;
+		let group = await Group.findById(_id);
+		if (group === null) {
+			return res.status(400).json({
+	            isSuccess: false,
+	            message: "Group not found!"
+        	});
+		}
+
+		let oldMembers = group.members.join() + ',';
+		for (let i = 0; i < members.length; i++) {
+			let regex = new RegExp(members[i]+',');
+			oldMembers = oldMembers.replace(regex, '');
+		}
+
+		oldMembers = oldMembers.slice(0, -1);
+		group.members = oldMembers.split(',');
+		await group.save(group);
+        return res.status(200).json({
+            isSuccess: true,
+            message: 'Update susscess'
+        });
+
+	} catch (err) {
+		return next(err);
 	}
 };
 
@@ -99,7 +156,7 @@ GroupController.delete = async (req, res, next) => {
         });
 
 	} catch (err) {
-		next(err);
+		return next(err);
 	}
 };
 
@@ -119,5 +176,12 @@ const copy = async (data, tableContent) => {
         };
 	}
 };
+
+const removeDuplicate = (arr) => {
+    let uniqueArray = arr.filter(function(elem, index, self) {
+        return index == self.indexOf(elem);
+    });
+    return uniqueArray;
+}
 
 export default GroupController;

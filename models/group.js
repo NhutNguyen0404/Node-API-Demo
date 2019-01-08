@@ -23,7 +23,8 @@ const cols = {
 		]
 	},
 	deletedAt: {
-		type: Date
+		type: Date,
+		default: null
 	}
 };
 
@@ -39,6 +40,7 @@ const checkMember = async (members, next) => {
 		return next(err);
 	}
 };
+
 groupSchema.pre('save', async function(next) {
 	const userId = this.author;
 	const members = this.members;
@@ -56,26 +58,38 @@ groupSchema.pre('save', async function(next) {
 	return next();
 });
 
+groupSchema.pre('update', async function(next) {
+	const userId = this._update.author;
+	const members = this._update.members;
+
+	let isMember = await checkMember([userId]);
+	if (!isMember) {
+		return next(new Error('User not found!'));
+	}
+
+	isMember = await checkMember(members); 
+	if (!isMember) {
+		return next(new Error('Members not found!'));
+	}
+
+	return next();
+});
+
+
 groupSchema.pre('find', function() {
 	const query = this.getQuery();
     query['$and'] = [
         {
             deletedAt: null
-        },
-        {
-            deleteAt: null
         }
     ]
 });
 
 groupSchema.pre('findOne', function() {
 	const query = this.getQuery();
-    query['$or'] = [
+    query['$and'] = [
         {
             deletedAt: null
-        },
-        {
-            deleteAt: null
         }
     ]
 });
