@@ -2,24 +2,24 @@ import Joi from 'joi';
 const user = {};
 user.createUser = {
     body: {
-		email: Joi.string().email().max(255),
-		gender: Joi.boolean().default(true),
-		firstName: Joi.string().max(20).required(),
-		lastName: Joi.string().max(20).required(),
-		password: Joi.string().min(6).required(),
-		refNames: Joi.array(),
-		birthday: Joi.date()
+		fullName: Joi.object().keys({
+			first: Joi.string().min(3).max(30),
+			last: Joi.string().min(3).max(30),
+		}),
+		email: Joi.string().email().max(30),
+		password: Joi.string().min(6).max(255),
+		deletedAt: Joi.empty(Joi.any()).default(null),
   	}
 };
 user.updateUser = {
     body: {
-		email: Joi.string().email().max(255),
-		gender: Joi.boolean().default(true),
-		firstName: Joi.string().max(20).required(),
-		lastName: Joi.string().max(20).required(),
-		password: Joi.string().min(6).required(),
-		refNames: Joi.array(),
-		birthday: Joi.date()
+		fullName: Joi.object().keys({
+			first: Joi.string().min(3).max(30),
+			last: Joi.string().min(3).max(30),
+		}),
+		email: Joi.string().email().max(30),
+		password: Joi.string().min(6).max(255),
+		deletedAt: Joi.empty(Joi.any()).default(null),
   	}
 };
 export default user;

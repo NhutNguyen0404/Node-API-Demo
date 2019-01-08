@@ -3,14 +3,16 @@ const Schema = mongoose.Schema;
 
 let userSchema = new Schema({
 	gender: Boolean,
-    firstName: {
-	    type: String,
-	    required: true
-	},
-    lastName: {
-	    type: String,
-	    required: true
-	},
+    fullName: {
+	    first: {
+            type: String,
+            maxlength: [ 30, 'firstName is too long!' ]
+        },
+        last: {
+            type: String,
+            maxlength: [ 30, 'lastName is too long!' ],
+        }
+    },
     email: {
 	    type: String,
 	    validate: {
@@ -20,6 +22,7 @@ let userSchema = new Schema({
 			message: props => `${props.value} is not a valid email!`
 		},
 		required: true,
+		maxlength: [30, 'email is too long!'],
 		index: { unique: true }
 	},
     password: {
@@ -27,43 +30,28 @@ let userSchema = new Schema({
 	    required: true,
 	    minlength: 6
 	},
-    refNames: [String],
-    birthday: {
-	    type: Date,
-	    validate: {
-	    	validator: function(v) {
-	    		return (new Date()).getFullYear() -  (new Date(v)).getFullYear() >= 18;
-	    	},
-	    	message: props => `${props.value} you must 18 age!`
-	    },
-	    required: true
+	password: {
+		type: String,
+		required: true,
+		maxlength: [255, 'password is too long!']
 	},
-	isDelete: {
-	    type: Boolean,
-	    default: false
-	},
+	deletedAt: Date
 });
 
 userSchema.pre('find', function() {
 	const query = this.getQuery();
-    query['$or'] = [
+    query['$and'] = [
         {
-            isDelete: false
-        },
-        {
-            isDelete: null
+            deletedAt: null
         }
     ]
 });
 
 userSchema.pre('findOne', function() {
 	const query = this.getQuery();
-    query['$or'] = [
+    query['$and'] = [
         {
-            isDelete: false
-        },
-        {
-            isDelete: null
+            deletedAt: null
         }
     ]
 });
