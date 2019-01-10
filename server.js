@@ -4,6 +4,10 @@ import connectToDb from './db/connect';
 import user from './routes/user.routes';
 import classes from './routes/class.routes';
 import group from './routes/group.routes';
+import login from './routes/login.routes';
+import logout from './routes/logout.routes';
+import authentication from './middleware/authentication';
+
 const server = express();
 
 connectToDb();
@@ -13,6 +17,9 @@ server.use(bodyParser.urlencoded({
     extended: false
 }));
 
+server.use(login);
+server.use(authentication);
+server.use(logout);
 server.use(user);
 server.use(classes);
 server.use(group);

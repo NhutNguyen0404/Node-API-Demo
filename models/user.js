@@ -25,17 +25,16 @@ let userSchema = new Schema({
 		maxlength: [30, 'email is too long!'],
 		index: { unique: true }
 	},
-    password: {
-	    type: String,
-	    required: true,
-	    minlength: 6
-	},
 	password: {
 		type: String,
 		required: true,
 		maxlength: [255, 'password is too long!']
 	},
-	deletedAt: Date
+	deletedAt: Date,
+	isLogin: {
+		type: Boolean,
+		default: false
+	}
 });
 
 userSchema.pre('find', function() {

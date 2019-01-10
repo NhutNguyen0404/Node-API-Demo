@@ -2,9 +2,11 @@ import User from '../models/user';
 import MD5 from 'md5';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-const saltRounds = 10;
+import configToken from '../config/index.js';
+
+const saltRounds = configToken.saltRounds;
 const salt = bcrypt.genSaltSync(saltRounds);
-const key = "922B9ED12B96D7C43F89B15F96154";
+const key = configToken.secretKey;
 const UserController = {};
 
 UserController.getAll = async (req, res, next) => {
@@ -67,42 +69,9 @@ UserController.updateUser = async (req, res, next) => {
     }
 };
 
-
-UserController.login = async (req, res, next) => {
-    try {
-        const { password, email } = req.body;
-        const user = await User.findOne({ email });
-
-        if (!user) {
-            return next(new Error('User is not found'));
-        }
-
-        const isCorrectPassword = bcrypt.compareSync(password, user.password);
-
-        if (!isCorrectPassword) {
-            return next(new Error('password is not correct'));
-        }
-        
-        const token = jwt.sign({
-            "_id": user._id,
-            "email": user.email
-        }, key, {
-            expiresIn: 86400,
-            algorithm: 'HS256'
-        });
-        
-        return res.json({
-            isSuccess: true,
-            items: token
-        });
-    } catch (err) {
-        return next(err);
-    }
-};
-
 UserController.changePassword = async (req, res, next) => {
     try {
-        const { id } = req.params;
+        const { id } = req.body.userLogin;
         const { currentPasswrod, newPassword } = req.body;
         let user = await User.findById(id);
         if (user === null) {
@@ -119,6 +88,7 @@ UserController.changePassword = async (req, res, next) => {
             });  
         }
 
+        user.isLogin = false;
         user.password =  await bcrypt.hashSync(newPassword, salt);
         await user.save();
         return res.status(200).json({
@@ -129,7 +99,7 @@ UserController.changePassword = async (req, res, next) => {
     } catch (err) {
         return next(err);
     }
-}
+};
 
 UserController.deleteUser = async (req, res, next) => {
     try {
