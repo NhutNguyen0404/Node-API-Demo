@@ -1,6 +1,10 @@
 import User from '../models/user';
 import MD5 from 'md5';
-
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+const saltRounds = 10;
+const salt = bcrypt.genSaltSync(saltRounds);
+const key = "922B9ED12B96D7C43F89B15F96154";
 const UserController = {};
 
 UserController.getAll = async (req, res, next) => {
@@ -33,7 +37,7 @@ UserController.create = async (req, res, next) => {
         const user = new User({
             fullName,
             email,
-            password: MD5(password),
+            password: await bcrypt.hashSync(password, salt),
         });
         await user.save();
         return res.status(200).json({
@@ -51,7 +55,7 @@ UserController.updateUser = async (req, res, next) => {
         const _id = req.params.id;
         const newData = req.body;
         if (newData.password) {
-            newData.password =  MD5(newData.password);
+            newData.password =  await bcrypt.hashSync(newData.password, salt);
         }
         const user = await User.findOneAndUpdate({_id:_id}, newData);
         return res.status(200).json({
@@ -67,23 +71,65 @@ UserController.updateUser = async (req, res, next) => {
 UserController.login = async (req, res, next) => {
     try {
         const { password, email } = req.body;
-
         const user = await User.findOne({ email });
+
         if (!user) {
             return next(new Error('User is not found'));
         }
-        const isCorrectPassword = MD5(password) === user.password;
+
+        const isCorrectPassword = bcrypt.compareSync(password, user.password);
+
         if (!isCorrectPassword) {
             return next(new Error('password is not correct'));
         }
+        
+        const token = jwt.sign({
+            "_id": user._id,
+            "email": user.email
+        }, key, {
+            expiresIn: 86400,
+            algorithm: 'HS256'
+        });
+        
         return res.json({
             isSuccess: true,
-            items:user
+            items: token
         });
     } catch (err) {
         return next(err);
     }
 };
+
+UserController.changePassword = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { currentPasswrod, newPassword } = req.body;
+        let user = await User.findById(id);
+        if (user === null) {
+            return res.status(400).json({
+                isSuccess: false,
+                message: 'User not found!'
+            });
+        }
+
+        if (!bcrypt.compareSync(currentPasswrod, user.password)) {
+            return res.status(400).json({
+                isSuccess: false,
+                message: 'The password is not correct!'
+            });  
+        }
+
+        user.password =  await bcrypt.hashSync(newPassword, salt);
+        await user.save();
+        return res.status(200).json({
+            isSuccess: true,
+            message: 'Update susscess!'
+        });  
+
+    } catch (err) {
+        return next(err);
+    }
+}
 
 UserController.deleteUser = async (req, res, next) => {
     try {
