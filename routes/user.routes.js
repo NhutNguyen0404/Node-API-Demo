@@ -17,7 +17,7 @@ const router = new Router();
 router.get('/users', UserController.getAll);
 router.get('/users/:id', UserController.getOneUser);// req.params
 router.post('/users', validate (validations.createUser), UserController.create); // req.body
-router.put('/users/change-password', UserController.changePassword);
+router.put('/users/change-password', validate (validations.updatePassword), UserController.changePassword);
 router.put('/users/:id', validate (validations.updateUser), UserController.updateUser); // req.body
 router.delete('/users/:id', UserController.deleteUser);
 

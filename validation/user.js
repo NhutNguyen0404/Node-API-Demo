@@ -22,4 +22,13 @@ user.updateUser = {
 		deletedAt: Joi.empty(Joi.any()).default(null),
   	}
 };
+
+user.updatePassword = {
+    body: {
+		currentPasswrod: Joi.string().min(6).max(255).required(),
+		newPassword: Joi.string().min(6).max(255).required(),
+		passwordConfirmation: Joi.string().min(6).max(255).valid(Joi.ref('newPassword')).required(),
+		deletedAt: Joi.empty(Joi.any()).default(null),
+  	}
+};
 export default user;
